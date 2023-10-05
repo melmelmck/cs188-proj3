@@ -62,13 +62,15 @@ class ValueIterationAgent(ValueEstimationAgent):
     def runValueIteration(self):
         # Write value iteration code here
         for iteration in range(self.iterations):
+            values = util.Counter()
             for state in self.mdp.getStates():
-                maxValue = self.values[state]
+                maxValue = -float('inf')
                 for action in self.mdp.getPossibleActions(state):
                     value = self.computeQValueFromValues(state, action)
                     if maxValue < value:
                         maxValue = value
-                self.values[state] = maxValue
+                        values[state] = value
+            self.values = values
 
 
     def getValue(self, state):
@@ -83,12 +85,11 @@ class ValueIterationAgent(ValueEstimationAgent):
           Compute the Q-value of action in state from the
           value function stored in self.values.
         """
-        max = 0
+        value = 0
         transitionStatesAndProbs = self.mdp.getTransitionStatesAndProbs(state, action)
         for i in transitionStatesAndProbs:
-            value = i[1] * (self.mdp.getReward(state, action, i[0]) + self.discount * self.values[i[0]])
-            max += value
-        return max
+            value += i[1] * (self.mdp.getReward(state, action, i[0]) + self.discount * self.values[i[0]])
+        return value
 
 
     def computeActionFromValues(self, state):
