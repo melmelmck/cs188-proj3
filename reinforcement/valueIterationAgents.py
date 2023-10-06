@@ -143,15 +143,28 @@ class PrioritizedSweepingValueIterationAgent(ValueIterationAgent):
     def runValueIteration(self):
         q = util.PriorityQueue()
         predecessors = set()
-        # need to compute predecessors
         for state in self.mdp.getStates():
-            diff = abs(self.values[state] - self.getValue(state))
-            q.put(state, -diff)
+            for action in self.mdp.getPossibleActions(state):
+                if not self.mdp.isTerminal(state):
+                    print("action: ", action)
+                    transitions = self.mdp.getTransitionStatesAndProbs(state, action)
+                    print("transitions: ", transitions)
+                    for i in transitions:
+                        nextState = i[0]
+                        probability = i[1]
+                        if probability > 0:
+                            predecessors.add(nextState)
+        print("pred: ", predecessors)
+        for state in self.mdp.getStates():
+            if not self.mdp.isTerminal(state):
+                diff = abs(self.values[state] - self.getValue(state))
+                q.push(state, -diff)
         for iteration in range(self.iterations):
-            if len(q) == 0:
+            if q.isEmpty():
                 break
             s = q.pop()
             # need to update the value of s in self.values
+            
             for p in predecessors:
                 maxValue = -float('inf')
                 for action in self.mdp.getPossibleActions(p):
